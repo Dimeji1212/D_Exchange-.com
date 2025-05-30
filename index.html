@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>D_Exchange💱📊 - Crypto Made Easy</title>
+  <meta name="author" content="Oladimeji Abdulquayum Adeyinka">
+
+  <!-- AOS for animations -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" />
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+    [data-theme="dark"] {
+      background-color: #0d1117;
+      color: #f1f1f1;
+    }
+    .crypto-icon {
+      width: 32px;
+      height: 32px;
+    }
+    .btn-glow {
+      background: linear-gradient(to right, #f7931a, #ff9900);
+      color: white;
+    }
+    .glass {
+      backdrop-filter: blur(10px);
+      background-color: rgba(255,255,255,0.05);
+    }
+    #whatsappChat {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-900 dark:bg-[#0d1117] dark:text-white">
+  <!-- Header -->
+  <header class="flex justify-between items-center p-4 shadow-lg fixed w-full bg-white dark:bg-[#161b22] z-50">
+    <h1 class="text-2xl font-bold">D_Exchange💱📊</h1>
+    <div class="flex items-center gap-4">
+      <button id="themeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-800">🌙</button>
+      <a href="#contact" class="btn-glow px-4 py-2 rounded-xl text-sm">Contact</a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="pt-24 px-6 text-center" data-aos="fade-up">
+    <h2 class="text-4xl font-bold mb-4">Buy Crypto. Easily. Securely.</h2>
+    <p class="text-lg mb-6">
+      Track prices, connect instantly, and download your resume with one click.
+    </p>
+    <a href="https://binance.com" target="_blank" class="btn-glow px-6 py-3 rounded-xl text-lg inline-block mr-4">Buy Crypto</a>
+    <a href="#" download="resume.pdf" class="border border-orange-500 text-orange-500 px-6 py-3 rounded-xl text-lg inline-block">Download Resume</a>
+  </section>
+
+  <!-- Live Crypto Prices Section (move this up, before Account Access) -->
+  <section class="py-8 px-6 max-w-xl mx-auto text-center" data-aos="fade-up" data-aos-delay="150" style="margin-top: 90px;">
+    <h2 class="text-2xl font-bold mb-6">Live Crypto Prices</h2>
+    <div class="flex justify-center gap-8 mb-6">
+      <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=029" alt="Bitcoin Logo" class="crypto-icon w-16 h-16" width="64" height="64" loading="lazy" />
+      <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=029" alt="Ethereum Logo" class="crypto-icon w-16 h-16" width="64" height="64" loading="lazy" />
+      <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=029" alt="USDT Logo" class="crypto-icon w-16 h-16" width="64" height="64" loading="lazy" />
+    </div>
+    <div class="flex flex-row justify-center gap-8 text-xl font-semibold">
+      <div class="flex items-center gap-2 justify-center">
+        <span>BTC:</span> <span id="btcPrice">...</span>
+      </div>
+      <div class="flex items-center gap-2 justify-center">
+        <span>ETH:</span> <span id="ethPrice">...</span>
+      </div>
+      <div class="flex items-center gap-2 justify-center">
+        <span>USDT:</span> <span id="usdtPrice">...</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Auth Section -->
+  <section class="pt-8 px-6 text-center max-w-xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+    <h2 class="text-2xl font-bold mb-4">Account Access</h2>
+    <div class="space-y-4">
+      <input id="email" type="email" placeholder="Email" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800" />
+      <input id="password" type="password" placeholder="Password" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800" />
+      <div class="flex gap-4 justify-center">
+        <button onclick="signUp()" class="btn-glow px-4 py-2 rounded">Sign Up</button>
+        <button onclick="signIn()" class="btn-glow px-4 py-2 rounded">Sign In</button>
+        <button onclick="signOut()" class="bg-red-500 text-white px-4 py-2 rounded">Sign Out</button>
+      </div>
+      <p id="authStatus" class="text-sm"></p>
+    </div>
+  </section>
+
+  <!-- Wallet Verification -->
+  <section class="py-12 px-6 text-center max-w-xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+    <h3 class="text-2xl font-bold mb-4">Verify Your Wallet</h3>
+    <form id="walletForm" class="space-y-4">
+      <input type="text" name="coin" placeholder="Coin (BTC/ETH/USDT)" required class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800" />
+      <input type="text" name="wallet" placeholder="Wallet Address" required class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-800" />
+      <button type="submit" class="btn-glow w-full p-3 rounded-xl">Verify Wallet</button>
+    </form>
+  </section>
+
+  <!-- Orders Log -->
+  <section class="py-12 px-6 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="300">
+    <h3 class="text-2xl font-bold mb-4 text-center">Submitted Wallets</h3>
+    <div id="orderLogs" class="space-y-2"></div>
+  </section>
+
+  <!-- Crypto Wallets Section -->
+  <section class="py-12 px-6 text-center" id="crypto-wallets" data-aos="fade-up">
+    <h3 class="text-2xl font-bold mb-6">Pay with Crypto</h3>
+    <div class="flex flex-col md:flex-row justify-center gap-8">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg" alt="Bitcoin" class="mx-auto mb-2 w-12 h-12">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bc1qlw3vyp9uuurzqqx5jtellsh0439ls977jy8ny6" alt="Bitcoin Wallet QR" class="mx-auto mb-2 rounded-lg" onerror="this.style.display='none'">
+        />
+        <p
+          class="mt-2 font-mono text-sm cursor-pointer select-all text-blue-500 hover:underline"
+          title="Click to copy Bitcoin address"
+          onclick="copyToClipboard('bc1qlw3vyp9uuurzqqx5jtellsh0439ls977jy8ny6')"
+          role="button"
+          tabindex="0"
+          onkeydown="if(event.key==='Enter'){copyToClipboard('bc1qlw3vyp9uuurzqqx5jtellsh0439ls977jy8ny6')}"
+        >
+          bc1qlw3vyp9uuurzqqx5jtellsh0439ls977jy8ny6
+        </p>
+      </div>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg" alt="Ethereum" class="mx-auto mb-2 w-12 h-12">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=0xCA324358FeE5BEd2D7BD69eb243E15a9789F73A8" alt="Ethereum Wallet QR" class="mx-auto mb-2 rounded-lg" onerror="this.style.display='none'">
+         />
+        <p
+          class="mt-2 font-mono text-sm cursor-pointer select-all text-blue-500 hover:underline"
+          title="Click to copy Ethereum address"
+          onclick="copyToClipboard('0xCA324358FeE5BEd2D7BD69eb243E15a9789F73A8')"
+          role="button"
+          tabindex="0"
+          onkeydown="if(event.key==='Enter'){copyToClipboard('0xCA324358FeE5BEd2D7BD69eb243E15a9789F73A8')}"
+        >
+          0xCA324358FeE5BEd2D7BD69eb243E15a9789F73A8
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact & Info -->
+  <section id="contact" class="py-16 px-6 max-w-2xl mx-auto text-center" data-aos="fade-up" data-aos-delay="500">
+    <h2 class="text-3xl font-bold mb-4">Contact & Info</h2>
+    <p class="mb-2">WhatsApp: <a href="https://wa.me/2349061755749" class="text-blue-500">09061755749</a></p>
+    <p>Telegram: <a href="https://t.me/crownedone0001" class="text-blue-500">@crownedone0001</a></p>
+  </section>
+
+  <!-- Floating WhatsApp -->
+  <div id="whatsappChat">
+    <a href="https://wa.me/2349061755749" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+      <img src="https://img.icons8.com/color/96/000000/whatsapp--v1.png" alt="Chat on WhatsApp" />
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init();
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      if (document.documentElement.getAttribute('data-theme') === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeToggle.textContent = '🌙';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️';
+      }
+    });
+
+    // Copy to clipboard & toast notification
+    function copyToClipboard(text) {
+      if (!navigator.clipboard) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          alert('Copied to clipboard: ' + text);
+        } catch {
+          alert('Failed to copy');
+        }
+        document.body.removeChild(textarea);
+        return;
+      }
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied to clipboard!');
+      }, () => {
+        alert('Failed to copy');
+      });
+    }
+
+    function showToast(message) {
+      let toast = document.getElementById('toastMessage');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toastMessage';
+        Object.assign(toast.style, {
+          position: 'fixed',
+          bottom: '40px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(37,211,102,0.9)',
+          color: 'white',
+          padding: '8px 20px',
+          borderRadius: '25px',
+          fontWeight: '600',
+          boxShadow: '0 0 10px rgba(37,211,102,0.7)',
+          zIndex: '9999',
+          opacity: '0',
+          transition: 'opacity 0.3s ease',
+        });
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.style.opacity = '1';
+
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 2000);
+    }
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+      projectId: "YOUR_FIREBASE_PROJECT_ID",
+      storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+      appId: "YOUR_FIREBASE_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const authStatus = document.getElementById('authStatus');
+    const orderLogs = document.getElementById('orderLogs');
+    const walletForm = document.getElementById('walletForm');
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authStatus.textContent = `Signed in as ${user.email}`;
+        loadOrders();
+      } else {
+        authStatus.textContent = 'Not signed in';
+        orderLogs.innerHTML = '';
+      }
+    });
+
+    async function signUp() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function signIn() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function signOut() {
+      try {
+        await auth.signOut();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    walletForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!auth.currentUser) {
+        alert('You must be signed in to submit wallet info');
+        return;
+      }
+      const formData = new FormData(walletForm);
+      const coin = formData.get('coin').toUpperCase();
+      const wallet = formData.get('wallet');
+      if (!['BTC', 'ETH', 'USDT'].includes(coin)) {
+        alert('Please enter a valid coin: BTC, ETH, or USDT');
+        return;
+      }
+      try {
+        await db.collection('wallets').add({
+          userId: auth.currentUser.uid,
+          coin,
+          wallet,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        alert('Wallet info submitted!');
+        walletForm.reset();
+        loadOrders();
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+
+    async function loadOrders() {
+      orderLogs.innerHTML = '';
+      if (!auth.currentUser) return;
+      const snapshot = await db.collection('wallets')
+        .where('userId', '==', auth.currentUser.uid)
+        .orderBy('timestamp', 'desc')
+        .limit(10)
+        .get();
+      if (snapshot.empty) {
+        orderLogs.textContent = 'No wallets submitted yet.';
+        return;
+      }
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const date = data.timestamp ? data.timestamp.toDate().toLocaleString() : 'Unknown';
+        const div = document.createElement('div');
+        div.className = 'bg-gray-100 dark:bg-gray-800 rounded p-3';
+        div.textContent = `[${date}] ${data.coin}: ${data.wallet}`;
+        orderLogs.appendChild(div);
+      });
+    }
+
+    // Crypto price fetch from CoinGecko
+    async function fetchPrices() {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,tether&vs_currencies=usd');
+        const data = await response.json();
+        document.getElementById('btcPrice').textContent = '$' + data.bitcoin.usd.toLocaleString();
+        document.getElementById('ethPrice').textContent = '$' + data.ethereum.usd.toLocaleString();
+        document.getElementById('usdtPrice').textContent = '$' + data.tether.usd.toLocaleString();
+      } catch {
+        // ignore errors
+      }
+    }
+    fetchPrices();
+    setInterval(fetchPrices, 30000); // update every 30 sec
+  </script>
+</body>
+</html>
